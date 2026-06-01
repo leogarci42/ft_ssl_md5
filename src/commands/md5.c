@@ -4,7 +4,7 @@ typedef struct s_md5_ctx
 {
 	uint64_t count;
 	uint32_t state[4];
-        uint8_t  buffer[64];
+  uint8_t  buffer[64];
 } t_md5_ctx;
 
 __attribute__((always_inline, cold))
@@ -15,7 +15,20 @@ static inline int ft_strlen(char *str)
         return (i);
 }
 
-void md5_update(t_md5_ctx *ctx, const uint8_t *input, size_t input_len)
+__attribute__((always_inline, hot))
+static inline void md5_transform(uint_32t state, uint8_t *buffer)
+{
+    for (uint8_t i = 0; i < 16; i++)
+    {
+      if (state == 1)
+      {
+        
+      }
+    }
+}
+
+__attribute__((always_inline, hot))
+static inline void md5_update(t_md5_ctx *ctx, const uint8_t *input, size_t input_len)
 {
 	size_t i = 0;
 	size_t index = (size_t)((ctx->count >> 3) & 0x3F);
@@ -49,14 +62,19 @@ static inline int ft_process_input(int fd, t_md5_ctx *ctx)
         return (0);
 }
 
-__attribute__((always_inline))
+__attribute__((always_inline, cold))
+static inline void md5_init(t_md5_ctx *ctx)
+{
+    for ()
+}
+
+__attribute__((always_inline, cold))
 static inline void cleanup_fd(int *fd)
 {
 	if (fd && *fd > 2) 
 		close(*fd);
 }
 
-__attribute__((always_inline, hot))
 int md5(uint8_t flags, __attribute__((cleanup(cleanup_fd))) int fd)
 {
 	t_md5_ctx ctx;
@@ -65,11 +83,7 @@ int md5(uint8_t flags, __attribute__((cleanup(cleanup_fd))) int fd)
 	(void)flags;
 	md5_init(&ctx);
 	if (ft_process_input(fd, &ctx) < 0)
-	{
-		close(fd);
 		return (1);
-	}
-	close(fd);
 	md5_final(digest, &ctx);
 	return (0);
 }
