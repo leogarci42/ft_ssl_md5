@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unistd.h>
+#include <stdint.h>
 
 // FLAGS
 #define P_FLAGS (1 << 0)
