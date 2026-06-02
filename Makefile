@@ -1,6 +1,7 @@
 CC = cc
 NAME = ft_ssl
-CFLAGS = -Wall -Wextra -I./includes/ -g3 -Wno-unused-command-line-argument -fPIE
+CFLAGS = -Wall -Wextra -I./includes/ -g3 -Wno-unused-command-line-argument -fPIE -march=native -ffast-math -funroll-loops -Wignored-attributes
+LDFLAGS = -lreadline
 OBJ_DIR = obj
 SRC =	./src/main.c \
 	./src/helpers/helpers.c \

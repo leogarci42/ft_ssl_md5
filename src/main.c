@@ -2,8 +2,8 @@
 #include "commands.h"
 #include <fcntl.h>
 
-__attribute__((always_inline, cold))
-static inline void ft_parse_error(char *str)
+        __attribute__((always_inline, cold))
+static inline int ft_parse_error(uint8_t flags, int fd, char *str)
 {
         // first line printer
         ft_putstr_fd("ft_ssl: Error: \'", 2);
@@ -12,24 +12,46 @@ static inline void ft_parse_error(char *str)
 
         // main prompt for help
         ft_putstr_fd("Commands:\nmd5\nsha256\n\nFlags:\n-p -q -r -s\n", 2);
+        close(fd);
+        return (2);
+}
+
+#define HEX_MD5    0x000000000035646dUL 
+#define HEX_SHA256 0x0000363532616873UL
+
+int (*func(char *str))(uint8_t flags, int fd, char *filename)
+{
+        union
+        {
+                char bytes[8];
+                uint64_t integer;
+        } token = {0};
+
+        for(int i = 0; str[i] && i < 7; i++)
+                token.bytes[i] = str[i];
+        if (str[7])
+                return (&ft_parse_error);
+        switch(token.integer)
+        {
+                case HEX_MD5 : return &md5; break;
+                case HEX_SHA256 : return &sha256; break;
+                default : return &ft_parse_error;
+        }
 }
 
 int main(int ac, char **av)
 {
         uint8_t flags = 0;
         int fd = 0;
+        char *filename = "NULL";
 
         if (ac == 1)
                 ft_putstr_fd("usage: ft_ssl command [flags] [file/string]\n", 2);
-        else if (ft_strncmp("md5", av[1], 4) && ft_strncmp("sha256", av[1], 7))
-                return (ft_parse_error(av[1]), 2);
         if (ac == 2)
         {
                 fd = 1;
-                if (ft_strncmp("md5", av[1], 4))
-                        return (md5(flags, fd));
-                if (ft_strncmp("sha256", av[1], 7))
-                        return (sha256(flags, fd));
+                if (func(av[1]))
+                        return (1);
         }
         if (ac >= 3)
         {
@@ -52,6 +74,9 @@ int main(int ac, char **av)
                         ft_putstr_fd(av[i], 2);
                         ft_putstr_fd("\n", 2);
                 }
+                filename = av[i];
+                if (func(av[1]))
+                        return (1);
         }
         return (0); 
 }
