@@ -3,13 +3,20 @@
 #include <unistd.h>
 #include <stdint.h>
 
+// HEX Value for my switch case
+
+#define HEX_MD5    0x000000000035646d      
+#define HEX_SHA256 0x0000363532616873
+
 // FLAGS
+
 #define P_FLAGS (1 << 0)
 #define Q_FLAGS (1 << 1)
 #define R_FLAGS (1 << 2)
 #define S_FLAGS (1 << 3)
 
 //MD5 rotation function
+
 #define F(x, y, z) (((x) & (y)) | ((~x) & (z)))
 #define G(x, y, z) (((x) & (z)) | ((y) & (~z)))
 #define H(x, y, z) ((x) ^ (y) ^ (z))

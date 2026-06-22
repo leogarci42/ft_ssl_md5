@@ -8,7 +8,7 @@ typedef struct s_md5_ctx
 } t_md5_ctx;
 
         __attribute__((always_inline, hot))
-static inline void md5_transform(uint32_t *state, uint8_t *buffer)
+static inline void md5_transform(uint32_t *state, const uint8_t *block)
 {
         uint32_t a = state[0], b = state[1], c = state[2], d = state[3];
         // hardcoded value that correspond to T[i(1 ... 64)] = 2^32 * |sin(i)| 
@@ -124,7 +124,7 @@ static inline void md5_update(t_md5_ctx *ctx, const uint8_t *input, size_t input
 }
 
         __attribute__((always_inline, cold))
-static inline int ft_process_input(int fd, t_md5_ctx *ctx)
+static inline int ft_process_input(int fd, t_md5_ctx *ctx, uint8_t flags)
 {
         uint8_t buf[4096]; 
         ssize_t bytes_read;
@@ -152,13 +152,6 @@ static inline void md5_init(t_md5_ctx *ctx)
         ctx->state[3] = 0x13DCE476;
 }
 
-        __attribute__((always_inline, cold))
-static inline void cleanup_fd(int *fd)
-{
-        if (fd && *fd > 2) 
-                close(*fd);
-}
-
         __attribute__((always_inline))
 static inline void md5_final(uint8_t *digest, t_md5_ctx *ctx)
 {
@@ -180,6 +173,8 @@ static inline void md5_final(uint8_t *digest, t_md5_ctx *ctx)
                 digest[i * 4 + 2] = (uint8_t)(ctx->state[i] >> 16);
                 digest[i * 4 + 3] = (uint8_t)(ctx->state[i] >> 24);
         }
+        for (size_t i = 0; digest[i]; i++)
+                write(1, &digest[i], 1);
 }
 
         __attribute__((always_inline))
@@ -194,7 +189,7 @@ static inline void ft_putstr(const char *str)
 }
 
         __attribute__((always_inline))
-static void print_md5_output(uint8_t flags, const char hash[32], const char *target, int is_string)
+static inline void print_md5_output(uint8_t flags, const char hash[32], const char *target, int is_string)
 {
         if ((flags & Q_FLAGS) || is_string == -1)
         {
@@ -221,15 +216,15 @@ static void print_md5_output(uint8_t flags, const char hash[32], const char *tar
         }
 }
 
-int md5(uint8_t flags, __attribute__((cleanup(cleanup_fd))) int fd, char *filename)
+int md5(uint8_t flags, int fd, char *filename)
 {
         t_md5_ctx ctx;
         uint8_t   digest[16];
 
-        (void)flags;
         md5_init(&ctx);
-        if (ft_process_input(fd, &ctx) < 0)
+        if (ft_process_input(fd, &ctx, flags) < 0)
                 return (1);
         md5_final(digest, &ctx);
+        (void)filename;
         return (0);
 }
