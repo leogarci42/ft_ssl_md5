@@ -28,6 +28,9 @@
     (a) += (b); \
 }
 
+// SHA256 MACRO
+#define ROTR(x, n) (((x) >> (n)) | ((x) << (32 - (n))))
+
 // commands
 
 int md5(uint8_t flags, int fd, char *filename);

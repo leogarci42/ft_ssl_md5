@@ -147,9 +147,9 @@ static inline void md5_init(t_md5_ctx *ctx)
 
         //norm defined in RFC 1321
         ctx->state[0] = 0x67452301;
-        ctx->state[1] = 0xEDFCBA45;
-        ctx->state[2] = 0x98CBADFE;
-        ctx->state[3] = 0x13DCE476;
+        ctx->state[1] = 0xEFCDAB89;
+        ctx->state[2] = 0x98BADCFE;
+        ctx->state[3] = 0x10325476; 
 }
 
         __attribute__((always_inline))
@@ -173,8 +173,6 @@ static inline void md5_final(uint8_t *digest, t_md5_ctx *ctx)
                 digest[i * 4 + 2] = (uint8_t)(ctx->state[i] >> 16);
                 digest[i * 4 + 3] = (uint8_t)(ctx->state[i] >> 24);
         }
-        for (size_t i = 0; digest[i]; i++)
-                write(1, &digest[i], 1);
 }
 
         __attribute__((always_inline))
@@ -218,13 +216,21 @@ static inline void print_md5_output(uint8_t flags, const char hash[32], const ch
 
 int md5(uint8_t flags, int fd, char *filename)
 {
-        t_md5_ctx ctx;
-        uint8_t   digest[16];
+        t_md5_ctx       ctx;
+        uint8_t         digest[16];
+        char            hash[32];
 
         md5_init(&ctx);
         if (ft_process_input(fd, &ctx, flags) < 0)
                 return (1);
         md5_final(digest, &ctx);
+        static const char hex[] = "0123456789abcdef";
+        for (int i = 0; i < 16; i++)
+        {
+                hash[i * 2]     = hex[(digest[i] >> 4) & 0xF];
+                hash[i * 2 + 1] = hex[digest[i] & 0xF];
+        }
+        print_md5_output(flags, hash, filename, 0);
         (void)filename;
         return (0);
 }
