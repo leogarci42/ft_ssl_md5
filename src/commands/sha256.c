@@ -145,16 +145,18 @@ static inline void print_sha256_output(uint8_t flags, const char hash[64], const
         {
                 write(1, hash, 64);
                 write(1, " ", 1);
-                if (is_string) write(1, "\"", 1);
-                // ft_putstr is static in md5.c — duplicate or move to helpers
+                if (is_string)
+                        write(1, "\"", 1);
                 write(1, target, __builtin_strlen(target));
-                if (is_string) write(1, "\"", 1);
+                if (is_string)
+                        write(1, "\"", 1);
                 write(1, "\n", 1);
         }
         else
         {
                 write(1, "SHA256 (", 8);
-                if (is_string) write(1, "\"", 1);
+                if (is_string)
+                        write(1, "\"", 1);
                 write(1, target, __builtin_strlen(target));
                 write(1, is_string ? "\") = " : ") = ", is_string ? 5 : 4);
                 write(1, hash, 64);
