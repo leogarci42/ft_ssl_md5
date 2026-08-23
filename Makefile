@@ -2,6 +2,8 @@ CC = cc
 NAME = ft_ssl
 CFLAGS = -Wall -Wextra -I./includes/ -g3 -Wno-unused-command-line-argument -fPIE -march=native -ffast-math -funroll-loops -Wignored-attributes
 LDFLAGS = -lreadline
+DEBUG_CFLAGS = -g -O0 -fsanitize=address,undefined -fno-omit-frame-pointer
+DEBUG_LDFLAGS = -fsanitize=address,undefined
 OBJ_DIR = obj
 SRC =	./src/main.c \
 	./src/helpers/helpers.c \
@@ -47,6 +49,10 @@ re: fclean
 .PHONY: all clean fclean re $(DIRS) rc 
 rc: fclean
 	@$(MAKE) re 
+
+.PHONY: debug
+debug:
+	@$(MAKE) CFLAGS="$(CFLAGS) $(DEBUG_CFLAGS)" LDFLAGS="$(LDFLAGS) $(DEBUG_LDFLAGS)" all
 
 
 RESET  = \e[0m

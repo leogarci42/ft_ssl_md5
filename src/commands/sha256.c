@@ -171,8 +171,12 @@ int sha256(uint8_t flags, int fd, char *filename)
         char         hash[64];
 
         sha256_init(&ctx);
-        if (ft_process_input_sha(fd, &ctx, flags) < 0)
-                return (1);
+        int is_string = (fd == -1) ? 1 : 0;
+        if (is_string)
+                sha256_update(&ctx, (const uint8_t *)filename, __builtin_strlen(filename));
+        else
+                if (ft_process_input_sha(fd, &ctx, flags) < 0)
+                        return (1);
         sha256_final(digest, &ctx);
         static const char hex[] = "0123456789abcdef";
         for (int i = 0; i < 32; i++)
@@ -180,6 +184,6 @@ int sha256(uint8_t flags, int fd, char *filename)
                 hash[i * 2]     = hex[(digest[i] >> 4) & 0xF];
                 hash[i * 2 + 1] = hex[digest[i] & 0xF];
         }
-        print_sha256_output(flags, hash, filename, 0);
+        print_sha256_output(flags, hash, filename, is_string);
         return (0);
 }

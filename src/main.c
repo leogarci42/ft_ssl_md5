@@ -8,12 +8,9 @@ static inline int ft_parse_error(uint8_t flags, int fd, char *str)
         (void)flags;
         (void)fd;
 
-        // first line printer
         ft_putstr_fd("ft_ssl: Error: \'", 2);
         ft_putstr_fd(str, 2);
         ft_putstr_fd("\' is an invalid command\n\n", 2);
-
-        // main prompt for help
         ft_putstr_fd("Commands:\nmd5\nsha256\n\nFlags:\n-p -q -r -s\n", 2);
         return (2);
 }
@@ -46,27 +43,45 @@ static inline void cleanup_fd(int *fd)
 }
 
         __attribute__((always_inline, cold))
-static inline int set_flags(uint8_t *flags, size_t ac, char **av)
+static inline int set_flags(uint8_t *flags, size_t ac, char **av, int (*function)(uint8_t, int, char *))
 {
-        size_t i = 2;
-        
-        for (i = 2; i < ac - 1; i++)
+        int i = 2;
+
+        for (; i < (int)ac; i++)
         {
-                if (av[i] && av[i][0] == '-' && av[i][1] != '\0')
+                if (!av[i] || av[i][0] != '-' || av[i][1] == '\0')
+                        break;
+                for (size_t j = 1; av[i][j]; j++)
                 {
-                        switch(av[i][1])
+                        switch (av[i][j])
                         {
-                                case 'p' : *flags |= P_FLAGS; continue ;
-                                case 'q' : *flags |= Q_FLAGS; continue ;
-                                case 'r' : *flags |= R_FLAGS; continue ;
-                                case 's' : *flags |= S_FLAGS; continue ;
+                                case 'p':
+                                        function((*flags) | P_FLAGS, 0, "(stdin)");
+                                        break;
+                                case 'q':
+                                        *flags |= Q_FLAGS; break;
+                                case 'r':
+                                        *flags |= R_FLAGS; break;
+                                case 's':
+                                        if (i + 1 >= (int)ac)
+                                        {
+                                                ft_putstr_fd("ft_ssl: ", 2);
+                                                ft_putstr_fd(av[1], 2);
+                                                ft_putstr_fd(": -s: No such file or directory\n", 2);
+                                                return (i + 1);
+                                        }
+                                        i++;
+                                        function((*flags) | S_FLAGS, -1, av[i]);
+                                        /* consume next arg, stop inner loop */
+                                        j = __builtin_strlen(av[i - 1]);
+                                        break;
+                                default:
+                                        break;
                         }
                 }
-
         }
         return (i);
 }
-
 int main(int ac, char **av)
 {
         uint8_t flags = 0;
@@ -79,19 +94,29 @@ int main(int ac, char **av)
         if (function == &ft_parse_error)
                 return (function(flags, fd, av[1]));
         if (ac == 2)
-                function(flags, fd, filename);
+        {
+                filename = "(stdin)";
+                function(flags, 0, filename);
+                return (0);
+        }
         if (ac >= 3)
         {
-                int i = set_flags(&flags, (size_t)ac, av);
+                int i = set_flags(&flags, (size_t)ac, av, function);
+
                 fd = open(av[i], O_RDONLY);
                 if (fd < 0)
                 {
-                        ft_putstr_fd("error: can't open ", 2);
+                        ft_putstr_fd("ft_ssl: ", 2);
+                        ft_putstr_fd(av[1], 2);
+                        ft_putstr_fd(": ", 2);
                         ft_putstr_fd(av[i], 2);
-                        ft_putstr_fd("\n", 2);
+                        ft_putstr_fd(": No such file or directory\n", 2);
                 }
-                filename = av[i];
-                function(flags, fd, filename);
+                else
+                {
+                        filename = av[i];
+                        function(flags, fd, filename);
+                }
         }
         return (0); 
 }
