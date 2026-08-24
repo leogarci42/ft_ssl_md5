@@ -46,7 +46,16 @@ re: fclean
 #	@rm -f X
 #	@make --no-print-directory fclean
 
-.PHONY: all clean fclean re $(DIRS) rc 
+TEST_BIN = $(OBJ_DIR)/test_unit
+
+test: $(NAME) $(OBJ)
+	@printf "$(BLUE)Building unit tests...$(RESET)\n"
+	@$(CC) $(CFLAGS) $(DEBUG_CFLAGS) ./tests/test_unit.c $(filter-out %main.o,$(OBJ)) -o $(TEST_BIN) $(LDFLAGS) $(DEBUG_LDFLAGS)
+	@./$(TEST_BIN)
+	@printf "$(BLUE)Running CLI regression tests...$(RESET)\n"
+	@bash ./tests/test_cli.sh
+
+.PHONY: all clean fclean re test $(DIRS) rc
 rc: fclean
 	@$(MAKE) re 
 

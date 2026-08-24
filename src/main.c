@@ -88,8 +88,11 @@ int main(int ac, char **av)
         __attribute__((cleanup(cleanup_fd)))int fd = 1;
         char *filename = "NULL";
 
-        if (ac == 1)
+        if (ac == 1 || !av[1])
+        {
                 ft_putstr_fd("usage: ft_ssl command [flags] [file/string]\n", 2);
+                return (2);
+        }
         int (*function)(uint8_t, int, char *) = func(av[1]);
         if (function == &ft_parse_error)
                 return (function(flags, fd, av[1]));
@@ -103,6 +106,17 @@ int main(int ac, char **av)
         {
                 int i = set_flags(&flags, (size_t)ac, av, function);
 
+                if (i >= ac || !av[i])
+                {
+                        int consumed = (av[ac - 1] && av[ac - 1][0] != '-');
+
+                        for (int k = 2; !consumed && k < ac; k++)
+                                if (av[k] && av[k][0] == '-')
+                                        consumed = (__builtin_strchr(av[k], 'p') != NULL);
+                        if (!consumed)
+                                function(flags, 0, "(stdin)");
+                        return (0);
+                }
                 fd = open(av[i], O_RDONLY);
                 if (fd < 0)
                 {
