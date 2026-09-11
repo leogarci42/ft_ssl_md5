@@ -46,16 +46,20 @@ re: fclean
 #	@rm -f X
 #	@make --no-print-directory fclean
 
-TEST_BIN = $(OBJ_DIR)/test_unit
+TEST_UNIT = ftest/test_unit
+TEST_CLI = ftest/test_cli
+CXX = c++
+CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic
 
 test: $(NAME) $(OBJ)
-	@printf "$(BLUE)Building unit tests...$(RESET)\n"
-	@$(CC) $(CFLAGS) $(DEBUG_CFLAGS) ./tests/test_unit.c $(filter-out %main.o,$(OBJ)) -o $(TEST_BIN) $(LDFLAGS) $(DEBUG_LDFLAGS)
-	@./$(TEST_BIN)
-	@printf "$(BLUE)Running CLI regression tests...$(RESET)\n"
-	@bash ./tests/test_cli.sh
+	@printf "$(BLUE)Running test series from ftest/...$(RESET)\n"
+	@$(MAKE) -C ftest project
 
-.PHONY: all clean fclean re test $(DIRS) rc
+.PHONY: test-lib
+test-lib:
+	@$(MAKE) -C ftest selfcheck
+
+.PHONY: all clean fclean re test test-lib $(DIRS) rc
 rc: fclean
 	@$(MAKE) re 
 

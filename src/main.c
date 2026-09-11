@@ -72,7 +72,6 @@ static inline int set_flags(uint8_t *flags, size_t ac, char **av, int (*function
                                         }
                                         i++;
                                         function((*flags) | S_FLAGS, -1, av[i]);
-                                        /* consume next arg, stop inner loop */
                                         j = __builtin_strlen(av[i - 1]);
                                         break;
                                 default:

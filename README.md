@@ -43,4 +43,18 @@ Notes
 - String inputs are handled by passing `-s "string"` and the implementation processes the string directly (no temporary files).
 - When `-p` is used the program echoes stdin content to stdout before printing the digest.
 
+Testing
+
+```sh
+make test        # unit tests + CLI regression series (71 checks total)
+make test-lib    # self-check of the ftest test library
+make debug       # ASan/UBSan build; `make test` afterwards runs everything
+                 # under the sanitizers
+```
+
+- [`tests/`](tests/README.md) — what is tested and how to add tests
+- [`ftest/`](ftest/README.md) — the C/C++ test library used by the testers
+  (suites, stdout capture, fd leak detection, heap-growth detection,
+  subprocess runner with timeouts)
+
 If you want me to also implement the bonus parts (interactive parser or Whirlpool), tell me and I will add them.
