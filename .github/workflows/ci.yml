@@ -13,6 +13,7 @@ jobs:
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y libreadline-dev
+        run: git clone https://github.com/leogarci42/ftest.git
 
       - name: Build
         run: make
